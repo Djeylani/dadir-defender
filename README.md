@@ -148,6 +148,12 @@ pyinstaller --onefile --windowed --icon=UI/assets/icon.png UI/dashboard.py
 ### Creating Installer
 Use Inno Setup with the provided script to create `DadirDefenderSetup.exe`
 
+## 📌 Roadmap
+
+[![Project Board](https://img.shields.io/badge/Project-Dadir_Defender_v1.1-blue?style=flat-square&logo=github)](https://github.com/users/Djeylani/projects/2/views/1)
+
+Track upcoming features and improvements for the next release.
+
 ## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
