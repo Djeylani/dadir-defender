@@ -1,0 +1,80 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Logs and temporary files
+Logs/
+*.log
+*.tmp
+temp/
+
+# Credentials and sensitive data
+*.key
+*.pem
+config.ini
+secrets.txt
+credentials.json
+monitor.ps1
+
+# Keep only the clean template
+!monitor_clean.ps1
+
+# Build artifacts
+*.exe
+*.msi
+setup/
+installer/
+
+# rclone config
+rclone.conf
+
+# Backup files
+*.bak
+*.backup
+*~
