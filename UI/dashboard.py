@@ -5,10 +5,11 @@ import psutil
 import threading
 from PIL import Image
 import pystray
-
+import subprocess
 
 LOG_DIR = "C:/DadirDefender/Logs"
 SCRIPT_PATH = "C:/DadirDefender/Agent/monitor.ps1"
+OPTIMIZER_PATH = "C:/DadirDefender/Optimizer/optimizer.ps1"
 ICON_PATH = "C:/DadirDefender/UI/assets/icon.png"
 
 def get_latest_log():
@@ -23,6 +24,14 @@ def get_latest_log():
 def run_cleanup():
     os.system(f"powershell.exe -Command \"Start-Process powershell -ArgumentList '{SCRIPT_PATH}' -Verb RunAs\"")
     messagebox.showinfo("Cleanup Triggered", "Agent script has been triggered.")
+
+def run_optimizer():
+    try:
+        subprocess.run(["powershell", "-ExecutionPolicy", "Bypass", "-File", OPTIMIZER_PATH], check=True)
+        optimizer_status.config(text="✅ Optimization complete.", fg="#00ffcc")
+    except subprocess.CalledProcessError as e:
+        optimizer_status.config(text="❌ Optimizer failed. See log.", fg="red")
+        messagebox.showerror("Error", f"Failed to run optimizer:\n{e}")
 
 def update_metrics():
     cpu = psutil.cpu_percent()
@@ -41,7 +50,7 @@ def show_log():
 
 root = tk.Tk()
 root.title("🛡️ Dadir Defender Dashboard")
-root.geometry("600x500")
+root.geometry("600x550")
 root.configure(bg="#1e1e1e")
 
 # Set custom icon
@@ -68,9 +77,14 @@ btn_frame.pack(pady=10)
 
 tk.Button(btn_frame, text="📄 View Logs", command=show_log, width=15).grid(row=0, column=0, padx=5)
 tk.Button(btn_frame, text="🧹 Run Cleanup", command=run_cleanup, width=15).grid(row=0, column=1, padx=5)
+tk.Button(btn_frame, text="⚙️ LLM Optimizer", command=run_optimizer, width=15).grid(row=0, column=2, padx=5)
+
+optimizer_status = tk.Label(root, text="", font=("Segoe UI", 10), fg="white", bg="#1e1e1e")
+optimizer_status.pack()
 
 log_text = scrolledtext.ScrolledText(root, height=15, bg="#2e2e2e", fg="white", font=("Consolas", 10))
 log_text.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
+
 def quit_app(icon, item):
     icon.stop()
     root.quit()
@@ -91,6 +105,7 @@ def hide_window():
         icon.run_detached()
     except Exception as e:
         print(f"Tray icon failed: {e}")
+
 root.protocol("WM_DELETE_WINDOW", hide_window)
 
 update_metrics()
