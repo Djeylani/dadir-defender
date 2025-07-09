@@ -67,11 +67,6 @@ function Backup-UserConfig {
         $configFiles += "Logs"
     }
     
-    # Backup rclone config if exists
-    if (Test-Path "$installPath\rclone.conf") {
-        $configFiles += "rclone.conf"
-    }
-    
     if ($configFiles.Count -gt 0) {
         New-Item -ItemType Directory -Path $backupPath -Force | Out-Null
         foreach ($file in $configFiles) {
@@ -226,22 +221,6 @@ foreach ($file in $filesToCopy) {
     }
 }
 
-# Restore configuration if backed up
-if ($backupLocation -and (Test-Path $backupLocation)) {
-    Write-Host "`n🔄 Restoring user configuration..." -ForegroundColor Yellow
-    try {
-        # Restore config files (but not the old scripts)
-        if (Test-Path "$backupLocation\Logs" -and $KeepConfig) {
-            Copy-Item "$backupLocation\Logs\*" "$installPath\Logs\" -Recurse -Force
-            Write-Host "  ✅ Restored logs" -ForegroundColor Green
-        }
-        
-        Write-Host "  📝 Note: Please reconfigure email settings in new modular scripts" -ForegroundColor Cyan
-    } catch {
-        Write-Host "  ⚠️ Could not restore some configuration: $_" -ForegroundColor Yellow
-    }
-}
-
 # Create desktop shortcut
 Write-Host "`n🔗 Creating shortcuts..." -ForegroundColor Yellow
 try {
@@ -258,11 +237,6 @@ try {
 
 Write-Host "`n🎉 Installation completed successfully!" -ForegroundColor Green
 Write-Host "📍 Installed to: $installPath" -ForegroundColor Cyan
-
-if ($backupLocation) {
-    Write-Host "📦 Configuration backup: $backupLocation" -ForegroundColor Cyan
-    Write-Host "💡 You can delete the backup after confirming everything works" -ForegroundColor Blue
-}
 
 Write-Host "`n🚀 Next steps:" -ForegroundColor Cyan
 Write-Host "1. Run: powershell -File `"$installPath\Agent\monitor_modular.ps1`"" -ForegroundColor White
