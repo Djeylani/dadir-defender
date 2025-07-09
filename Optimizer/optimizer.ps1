@@ -1,49 +1,44 @@
-# optimizer.ps1
-# Dadir Defender – LLM Optimization Script
-# Author: Djeylani
-# Description: Optimizes Windows for local LLM workloads (e.g., Ollama)
+# Dadir Defender - Complete System Optimizer
+# Modular approach with individual optimization scripts
 
-Write-Host "🔧 Starting LLM Optimization..." -ForegroundColor Cyan
+param(
+    [string]$LogFile = "C:\DadirDefender\Logs\optimizer_$(Get-Date -Format 'yyyy-MM-dd_HH-mm-ss').txt"
+)
 
-# Disable unnecessary startup apps
-Write-Host "Disabling non-essential startup programs..."
-Get-CimInstance Win32_StartupCommand | Where-Object { $_.Command -notmatch "Defender|Security|Ollama" } | ForEach-Object {
-    Write-Host "Disabling: $($_.Name)"
-    # Optional: Disable via Task Scheduler or Registry
-}
+$base = "C:\DadirDefender\Optimizer"
 
-# Enable performance mode (disable animations)
-Write-Host "Enabling visual performance mode..."
-Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "UserPreferencesMask" -Value ([byte[]](0x90,0x12,0x03,0x80,0x10,0x00,0x00,0x00))
-Stop-Process -Name explorer -Force
-Start-Process explorer
+Write-Host "🛡️ Running Dadir Defender Optimizer..." -ForegroundColor Cyan
+Add-Content $LogFile "Dadir Defender Optimizer started at $(Get-Date)"
 
-# Enable Storage Sense
-Write-Host "Configuring Storage Sense..."
-$storageSense = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\StorageSense\Parameters\StoragePolicy"
-if ($storageSense.DisableStorageSense -eq 1) {
-    Set-ItemProperty -Path $storageSense.PSPath -Name "DisableStorageSense" -Value 0
-    Write-Host "Storage Sense enabled."
-}
+# Core System Optimizations
+Write-Host "📊 Process Priority Management..." -ForegroundColor Yellow
+& "$base\ProcessPriorityManager.ps1" -LogFile $LogFile
 
-# Optimize drives
-Write-Host "Optimizing drives..."
-Get-Volume | Where-Object { $_.DriveType -eq 'Fixed' } | ForEach-Object {
-    Optimize-Volume -DriveLetter $_.DriveLetter -Verbose
-}
+Write-Host "⚡ Power Plan Optimization..." -ForegroundColor Yellow
+& "$base\PowerPlanOptimizer.ps1" -LogFile $LogFile
 
-# Disable indexing on dev folders
-$devFolders = @("$env:USERPROFILE\Documents\Code", "$env:USERPROFILE\Projects")
-foreach ($folder in $devFolders) {
-    if (Test-Path $folder) {
-        Write-Host "Disabling indexing for: $folder"
-        & 'attrib' +R "$folder" /S /D
-    }
-}
+Write-Host "🎨 Visual Performance Mode..." -ForegroundColor Yellow
+& "$base\EnablePerformanceMode.ps1"
 
-# Cleanup temp files
-Write-Host "Cleaning temporary files..."
-Remove-Item "$env:TEMP\*" -Recurse -Force -ErrorAction SilentlyContinue
-Remove-Item "C:\Windows\Temp\*" -Recurse -Force -ErrorAction SilentlyContinue
+Write-Host "🔧 Services Optimization..." -ForegroundColor Yellow
+& "$base\ServicesOptimizer.ps1" -LogFile $LogFile
 
-Write-Host "✅ Optimization complete. Ready for LLM workloads." -ForegroundColor Green
+# Background Monitoring
+Write-Host "🛡️ Background App Guard (Safe Scan)..." -ForegroundColor Yellow
+& "$base\BackgroundAppGuard.ps1" -LogFile $LogFile -SafeMode
+
+# System Maintenance
+Write-Host "🧹 Log and Junk Cleanup..." -ForegroundColor Yellow
+& "$base\LogCleanup.ps1" -LogFile $LogFile
+
+Write-Host "💾 Storage Optimization..." -ForegroundColor Yellow
+& "$base\EnableStorageSense.ps1"
+& "$base\OptimizeDrives.ps1"
+
+# Startup and Indexing
+Write-Host "🚀 Startup Optimization..." -ForegroundColor Yellow
+& "$base\DisableStartupApps.ps1"
+& "$base\DisableIndexing.ps1"
+
+Add-Content $LogFile "Dadir Defender Optimizer completed at $(Get-Date)"
+Write-Host "✅ Optimization complete. System ready for LLM workloads!" -ForegroundColor Green
