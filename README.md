@@ -2,7 +2,7 @@
 
 **A comprehensive Windows security monitoring agent with GUI dashboard**
 
-![Version](https://img.shields.io/badge/version-1.0-blue.svg)
+![Version](https://img.shields.io/badge/version-2.0-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-Windows-lightgrey.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
@@ -49,14 +49,26 @@ DadirDefender/
 ### Prerequisites
 - Windows 10/11
 - PowerShell 5.1+
-- Python 3.8+ (for development)
-- rclone (for Google Drive integration)
+- Python 3.8+ (optional, for GUI)
+- Administrator privileges (for full functionality)
 
-### Quick Install
-1. Download `DadirDefenderSetup.exe` from releases
-2. Run installer as administrator
-3. Configure rclone for Google Drive (optional)
-4. Set up VirusTotal API key (optional)
+### 🆕 **Upgrade-Aware Installation (v2.0)**
+```powershell
+# Download and run the upgrade-aware installer
+powershell -File "install_with_upgrade.ps1"
+```
+
+**Features:**
+- ✅ **Detects existing installations**
+- ✅ **Backs up user configuration**
+- ✅ **Clean upgrade process**
+- ✅ **Handles service conflicts**
+
+### Quick Install (New Users)
+1. Download release package
+2. Extract to desired location
+3. Run as Administrator: `powershell -File "install_with_upgrade.ps1"`
+4. Configure optional features using `setup_validator.ps1`
 
 ### Manual Setup
 ```bash
@@ -174,12 +186,22 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🔄 Changelog
 
-### v1.0 (Current)
+### v2.0 (Current) - Major Modular Refactor
+- 🔧 **Modular Architecture**: Individual optimization components
+- 🎨 **LLM Performance**: Process priority optimization for development tools
+- 🧹 **Smart Cleanup**: 99.94% log space reduction (157MB → 0.1MB)
+- 📶 **Intelligent Uploads**: Daily/event-based only (no flooding)
+- 🔒 **Enhanced Safety**: Developer-friendly, no workflow disruption
+- 📦 **Upgrade Support**: Detects and handles existing installations
+
+### v1.0 (Legacy)
 - Initial release
 - PowerShell monitoring agent
 - Python GUI dashboard
 - Windows service integration
 - Installer package
+
+**🔄 Upgrading from v1.x?** Use `install_with_upgrade.ps1` for seamless migration.
 
 ---
 
