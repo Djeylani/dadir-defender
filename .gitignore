@@ -69,7 +69,7 @@ monitor.ps1
 *.exe
 *.msi
 setup/
-installer/
+# installer/ - Allow installer folder for upgrade-aware installer
 
 # rclone config
 rclone.conf
