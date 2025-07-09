@@ -15,11 +15,17 @@ This checklist tracks the implementation of features aimed at optimizing your la
 - [ ] **Smart Storage Sense**  
   Enable/configure Windows Storage Sense to auto-delete temporary files and keep disk space free.
 
-- [ ] **Drive Optimization**  
+- [x] **Drive Optimization**  
   Integrate or trigger built-in drive optimization (defrag/trim) for storage health.
 
 - [ ] **Background App Guard**  
   Detect and block non-essential apps from running in the background, reducing RAM/CPU usage.
+
+- [ ] **Process Priority Manager**  
+  Automatically set high priority for LLM processes and lower priority for non-essential apps.
+
+- [ ] **RAM Usage Optimizer**  
+  Clear standby memory and optimize RAM allocation when memory usage exceeds threshold.
 
 - [ ] **Browser Tab Limiter**  
   Warn or limit the number of open browser tabs when LLM models are running.
@@ -27,20 +33,23 @@ This checklist tracks the implementation of features aimed at optimizing your la
 - [ ] **Software Cleanup Assistant**  
   Scan for and assist in removing unused or rarely-used software.
 
-- [ ] **Scheduled Restart Reminder**  
+- [ ] **Windows Services Optimizer**  
+  Disable unnecessary Windows services that consume resources in the background.
+
+- [x] **Scheduled Restart Reminder**  
   Remind or schedule regular system restarts to clear temp data and refresh memory.
 
 ---
 
 ## Advanced LLM Mode (“Ollama-Ready Boost”)
 
-- [ ] **Resource Monitor & Bottleneck Detector**  
+- [x] **Resource Monitor & Bottleneck Detector**  
   Real-time monitoring of CPU, RAM, Disk, and GPU usage. Alert for performance bottlenecks.
 
 - [ ] **Virtual Memory (Page File) Optimizer**  
   Check and recommend/set optimal virtual memory settings for LLM workloads.
 
-- [ ] **Temporary File Cleaner**  
+- [x] **Temporary File Cleaner**  
   One-click or scheduled clearing of system and app temp files.
 
 - [ ] **Driver & System Update Checker**  
@@ -61,11 +70,17 @@ This checklist tracks the implementation of features aimed at optimizing your la
 - [ ] **Heavy App Conflict Alert**  
   Warn if multiple heavy apps or LLMs are running together, risking system overload.
 
+- [ ] **GPU Memory Monitor**  
+  Track GPU VRAM usage and alert when approaching limits for LLM workloads.
+
+- [ ] **Power Plan Optimizer**  
+  Automatically switch to High Performance power plan when running intensive tasks.
+
 ---
 
 ## Stretch/Future Features
 
-- [ ] **Automated Script Runner**  
+- [x] **Automated Script Runner**  
   One-click system cleanup and optimization before LLM/model usage.
 
 - [ ] **Direct LLM Runtime Integration**  
@@ -73,6 +88,12 @@ This checklist tracks the implementation of features aimed at optimizing your la
 
 - [ ] **Optimization History & Analytics**  
   Show resource usage and optimization history for continuous improvement.
+
+- [ ] **Quick Performance Profiles**  
+  One-click switching between "Gaming", "Development", "LLM", and "Battery Saver" modes.
+
+- [ ] **Network Bandwidth Monitor**  
+  Monitor and limit background network usage to prioritize LLM model downloads.
 
 ---
 

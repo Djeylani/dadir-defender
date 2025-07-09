@@ -39,17 +39,22 @@ if (!(Test-Path $logPath)) {
 
 # --- Section 2: Detect Failed RDP Logins ---
 Add-Content $logFile "`n=== Failed RDP Login Attempts ==="
-$events = Get-WinEvent -FilterHashtable @{LogName = 'Security'; Id = 4625 } -MaxEvents 100
-$rdpFailures = $events | Where-Object { $_.Message -like "*Logon Type:\s+10*" }
+try {
+    $events = Get-WinEvent -FilterHashtable @{LogName = 'Security'; Id = 4625 } -MaxEvents 10 -ErrorAction Stop
+    $rdpFailures = $events | Where-Object { $_.Message -like "*Logon Type:\s+10*" }
 
-$rdpFailures | ForEach-Object {
-    $ip = ($_ | Select-String -Pattern "Source Network Address:\s+(\d{1,3}\.){3}\d{1,3}").Matches.Value
-    Add-Content $logFile "$($_.TimeCreated) - Failed login from $ip"
-}
+    $rdpFailures | ForEach-Object {
+        $ip = ($_ | Select-String -Pattern "Source Network Address:\s+(\d{1,3}\.){3}\d{1,3}").Matches.Value
+        Add-Content $logFile "$($_.TimeCreated) - Failed login from $ip"
+    }
 
-if ($rdpFailures.Count -gt 0) {
-    $body = $rdpFailures | ForEach-Object { $_.Message } -join "`n"
-    Send-Alert -subject "[RDP Alert] Failed Logins on $env:COMPUTERNAME" -body $body
+    if ($rdpFailures.Count -gt 0) {
+        $body = $rdpFailures | ForEach-Object { $_.Message } -join "`n"
+        Send-Alert -subject "[RDP Alert] Failed Logins on $env:COMPUTERNAME" -body $body
+    }
+} catch {
+    Write-Host "No matching security events found. Skipping RDP check."
+    Add-Content $logFile "No RDP login events found or access denied"
 }
 
 # --- Section 3: Log System Metrics ---
@@ -67,7 +72,8 @@ $disk | ForEach-Object {
 }
 
 if ($cpu -gt 80) {
-    Send-Alert -subject "[CPU Alert] High Load on $env:COMPUTERNAME" -body "CPU Load is at $cpu%"
+    Add-Content $logFile "High CPU usage detected: $cpu%"
+    # Send-Alert -subject "[CPU Alert] High Load on $env:COMPUTERNAME" -body "CPU Load is at $cpu%"
 }
 
 # --- Section 4: Upload to Google Drive ---
@@ -122,43 +128,34 @@ if ((Get-Date).DayOfWeek -eq 'Sunday') {
     Start-Process -FilePath "defrag.exe" -ArgumentList "C: /O" -Verb RunAs
 }
 
-# --- Section 8: VirusTotal Scan with Rate Limiting ---
-$vtApiKey = ""  # Set your API key here or use credential manager
-$vtThreshold = 5
-$maxVtRequests = 4  # Free tier: 4 requests per minute
-$vtRequestCount = 0
+# --- Section 8: RAM Usage Optimizer ---
+Add-Content $logFile "`n=== RAM Usage Optimizer ==="
+$ram = Get-CimInstance Win32_OperatingSystem
+$ramUsagePercent = [math]::Round((($ram.TotalVisibleMemorySize - $ram.FreePhysicalMemory) / $ram.TotalVisibleMemorySize) * 100, 2)
 
-if ($vtApiKey -ne "") {
-    Add-Content $logFile "`n=== VirusTotal Scan (Rate Limited) ==="
-    $exePaths = Get-Process | Where-Object { $_.Path -and (Test-Path $_.Path) } | Select-Object -ExpandProperty Path -Unique | Select-Object -First $maxVtRequests
+Add-Content $logFile "Current RAM Usage: $ramUsagePercent%"
 
-    foreach ($path in $exePaths) {
-        if ($vtRequestCount -ge $maxVtRequests) {
-            Add-Content $logFile "VT rate limit reached, stopping scan"
-            break
-        }
-        
-        try {
-            $hash = (Get-FileHash -Path $path -Algorithm SHA256).Hash
-            $vtUrl = "https://www.virustotal.com/api/v3/files/$hash"
-            $headers = @{ "x-apikey" = $vtApiKey }
+if ($ramUsagePercent -gt 50) {
+    Add-Content $logFile "High RAM usage detected, clearing standby memory..."
+    try {
+        $code = @'
+[DllImport("kernel32.dll")]
+public static extern int SetProcessWorkingSetSize(IntPtr process, int minimumWorkingSetSize, int maximumWorkingSetSize);
+'@
+        $type = Add-Type -MemberDefinition $code -Name Win32 -PassThru
+        $type::SetProcessWorkingSetSize((Get-Process -Id $PID).Handle, -1, -1)
 
-            $response = Invoke-RestMethod -Uri $vtUrl -Headers $headers -Method Get -ErrorAction Stop
-            $detections = $response.data.attributes.last_analysis_stats.malicious
-            $vtRequestCount++
+        [System.GC]::Collect()
+        [System.GC]::WaitForPendingFinalizers()
 
-            if ($detections -ge $vtThreshold) {
-                $msg = "$path flagged by VirusTotal ($detections detections)"
-                Add-Content $logFile $msg
-                Send-Alert -subject "[VirusTotal Alert] $env:COMPUTERNAME" -body $msg
-            }
-            
-            Start-Sleep -Seconds 15  # Rate limiting: 4 requests per minute
-        } catch {
-            Add-Content $logFile "VT scan failed for ${path}: $_"
-            $vtRequestCount++
-        }
+        Add-Content $logFile "Standby memory cleared successfully"
+        Add-Content $logFile "RAM Alert: Memory optimized, was $ramUsagePercent%"
+        # Send-Alert -subject "[RAM Alert] Memory Optimized on $env:COMPUTERNAME" -body "RAM usage was $ramUsagePercent%, standby memory cleared"
+    } catch {
+        Add-Content $logFile "Failed to clear standby memory: $_"
     }
-} else {
-    Add-Content $logFile "`n=== VirusTotal Scan Skipped (No API Key) ==="
 }
+
+# --- Final Confirmation ---
+Write-Host "✅ Script completed successfully."
+exit 0

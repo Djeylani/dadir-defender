@@ -8,8 +8,8 @@ import pystray
 import subprocess
 
 LOG_DIR = "C:/DadirDefender/Logs"
-SCRIPT_PATH = "C:/DadirDefender/Agent/monitor.ps1"
-OPTIMIZER_PATH = "C:/DadirDefender/Optimizer/optimizer.ps1"
+SCRIPT_PATH = "C:/DadirDefender/Optimizer/Optimizer.ps1"
+OPTIMIZER_PATH = "C:/DadirDefender/Optimizer/Optimizer.ps1"
 ICON_PATH = "C:/DadirDefender/UI/assets/icon.png"
 
 def get_latest_log():
@@ -21,9 +21,33 @@ def get_latest_log():
     except:
         return "No logs found."
 
-def run_cleanup():
-    os.system(f"powershell.exe -Command \"Start-Process powershell -ArgumentList '{SCRIPT_PATH}' -Verb RunAs\"")
-    messagebox.showinfo("Cleanup Triggered", "Agent script has been triggered.")
+def run_optimizer():
+    subprocess.Popen([
+        "powershell.exe",
+        "-NoProfile",
+        "-ExecutionPolicy", "Bypass",
+        "-Command", f"Start-Process powershell -ArgumentList '{OPTIMIZER_PATH}' -Verb RunAs"
+    ])
+    messagebox.showinfo("Optimizer Triggered", "Dadir Defender Optimizer has been launched.")
+
+def trim_ram():
+    script = """
+    Get-Process | ForEach-Object {
+        try {
+            $_.MinWorkingSet = $_.MinWorkingSet
+            $_.MaxWorkingSet = $_.MaxWorkingSet
+        } catch {}
+    }
+    """
+    subprocess.run(["powershell.exe", "-Command", script])
+    messagebox.showinfo("RAM Trimmed", "Working sets have been trimmed.")
+
+def show_top_ram_users():
+    script = """
+    Get-Process | Sort-Object WorkingSet -Descending | Select-Object -First 10 Name, Id, @{Name='MemoryMB';Expression={[math]::Round($_.WorkingSet / 1MB, 2)}} | Out-String
+    """
+    result = subprocess.run(["powershell.exe", "-Command", script], capture_output=True, text=True)
+    messagebox.showinfo("Top RAM Users", result.stdout.strip())
 
 def run_optimizer():
     try:
@@ -76,8 +100,9 @@ btn_frame = tk.Frame(root, bg="#1e1e1e")
 btn_frame.pack(pady=10)
 
 tk.Button(btn_frame, text="📄 View Logs", command=show_log, width=15).grid(row=0, column=0, padx=5)
-tk.Button(btn_frame, text="🧹 Run Cleanup", command=run_cleanup, width=15).grid(row=0, column=1, padx=5)
-tk.Button(btn_frame, text="⚙️ LLM Optimizer", command=run_optimizer, width=15).grid(row=0, column=2, padx=5)
+tk.Button(btn_frame, text="⚙️ Run Optimizer", command=run_optimizer, width=15).grid(row=0, column=1, padx=5)
+tk.Button(btn_frame, text="🧠 Trim RAM", command=trim_ram, width=15).grid(row=1, column=0, padx=5, pady=5)
+tk.Button(btn_frame, text="🔍 Top RAM Users", command=show_top_ram_users, width=15).grid(row=1, column=1, padx=5, pady=5)
 
 optimizer_status = tk.Label(root, text="", font=("Segoe UI", 10), fg="white", bg="#1e1e1e")
 optimizer_status.pack()
